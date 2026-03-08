@@ -1,0 +1,222 @@
+-- =========================
+--        LOAD WIND UI
+-- =========================
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- =========================
+-- KEY SYSTEM
+-- =========================
+local CorrectKey = "Thanakrit2009"
+local SavedInput = ""
+local Unlocked = false
+local Running = false
+local CurrentTween
+
+-- =========================
+-- CREATE WINDOW
+-- =========================
+local Window = WindUI:CreateWindow({
+    Title = "THANAKRIT HUB 😈",
+    Icon = "key",
+    Author = "By เสี๋ยคิวจัดให้ XD",
+    Folder = "MyHub",
+    Size = UDim2.fromOffset(580, 400),
+    Theme = "Dark"
+})
+
+-- =========================
+-- KEY TAB
+-- =========================
+local KeyTab = Window:Tab({ Title = "Key System", Icon = "key" })
+KeyTab:Section({ Title = "Enter Key" })
+
+KeyTab:Input({
+    Title = "ใส่ Key",
+    Placeholder = "Enter key...",
+    Callback = function(text)
+        SavedInput = text
+    end
+})
+
+-- =========================
+-- SETTINGS TAB
+-- =========================
+local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
+
+SettingsTab:Button({
+    Title = "รีเข้าแมพ",
+    Callback = function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId)
+    end
+})
+
+SettingsTab:Button({
+    Title = "ปิด UI",
+    Callback = function()
+        local gui = player.PlayerGui:FindFirstChild("MyHub")
+        if gui then gui:Destroy() end
+    end
+})
+
+-- =========================
+-- LOAD MAIN (AUTO TP ONLY)
+-- =========================
+local function LoadMain()
+
+    local MainTab = Window:Tab({
+        Title = "AutoFarm",
+        Icon = "map-pin"
+    })
+
+    -- =========================
+    -- POINTS
+    -- =========================
+    local Points = {
+        Vector3.new(-60,120,1372),
+        Vector3.new(-60,120,2137),
+        Vector3.new(-60,120,2916),
+        Vector3.new(-60,120,3681),
+        Vector3.new(-60,120,4444),
+        Vector3.new(-60,120,5214),
+        Vector3.new(-60,120,5973),
+        Vector3.new(-60,120,6745),
+        Vector3.new(-60,120,7529),
+        Vector3.new(-60,120,8302),
+        Vector3.new(-60,-354,9492)
+    }
+
+    local SPEED = 400
+    local WAIT_TIME = 16
+
+    -- FLOAT
+    local function ApplyFloat(hrp)
+        local old = hrp:FindFirstChild("AutoFloat")
+        if old then old:Destroy() end
+        local float = Instance.new("BodyVelocity")
+        float.Name = "AutoFloat"
+        float.MaxForce = Vector3.new(0,math.huge,0)
+        float.Parent = hrp
+    end
+
+    local function RemoveFloat(hrp)
+        local old = hrp:FindFirstChild("AutoFloat")
+        if old then old:Destroy() end
+    end
+
+    -- SMOOTH MOVE
+    local function SmoothMove(hrp,pos)
+        if CurrentTween then
+            CurrentTween:Cancel()
+        end
+
+        local distance = (hrp.Position-pos).Magnitude
+        local time = distance/SPEED
+
+        CurrentTween = TweenService:Create(
+            hrp,
+            TweenInfo.new(time,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),
+            {CFrame=CFrame.new(pos)}
+        )
+
+        CurrentTween:Play()
+        CurrentTween.Completed:Wait()
+
+        return Running
+    end
+
+    -- COUNTDOWN SOUND
+    local tick = Instance.new("Sound",player.PlayerGui)
+    tick.SoundId = "rbxassetid://9113420770"
+    tick.Volume = 1
+
+    local final = Instance.new("Sound",player.PlayerGui)
+    final.SoundId = "rbxassetid://6026984224"
+    final.Volume = 1
+
+    -- LOOP
+    local function AutoTeleportLoop()
+        while Running do
+
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+
+            ApplyFloat(hrp)
+
+            for i,pos in ipairs(Points) do
+                if not Running then return end
+                if not SmoothMove(hrp,pos) then return end
+                task.wait(0.2)
+
+                if i == #Points then
+                    RemoveFloat(hrp)
+
+                    for t = WAIT_TIME,1,-1 do
+                        if not Running then break end
+
+                        if t <= 3 then
+                            final:Play()
+                        else
+                            tick:Play()
+                        end
+
+                        task.wait(1)
+                    end
+                end
+            end
+        end
+    end
+
+    -- TOGGLE BUTTON
+    MainTab:Toggle({
+        Title = "เปิด / ปิด Auto Farm",
+        Callback = function(state)
+            Running = state
+
+            if state then
+                WindUI:Notify({
+                    Title = "Auto TP",
+                    Description = "ระบบเริ่มทำงานแล้ว",
+                    Duration = 2
+                })
+                task.spawn(AutoTeleportLoop)
+            else
+                WindUI:Notify({
+                    Title = "Auto TP",
+                    Description = "ระบบหยุดทำงาน",
+                    Duration = 2
+                })
+            end
+        end
+    })
+end
+
+-- =========================
+-- KEY BUTTON
+-- =========================
+KeyTab:Button({
+    Title = "ยืนยันคีย์",
+    Callback = function()
+        if SavedInput == CorrectKey and not Unlocked then
+            Unlocked = true
+
+            WindUI:Notify({
+                Title = "สำเร็จ",
+                Description = "Key ถูกต้อง ✅",
+                Duration = 2
+            })
+
+            LoadMain()
+        else
+            WindUI:Notify({
+                Title = "ผิดพลาด",
+                Description = "Key ไม่ถูกต้อง ❌",
+                Duration = 3
+            })
+        end
+    end
+})
