@@ -11,7 +11,7 @@ local player = Players.LocalPlayer
 -- =========================
 -- KEY SYSTEM
 -- =========================
-local CorrectKey = "Thanakrit2009"
+local CorrectKey = "Thanakrit2010"
 local SavedInput = ""
 local Unlocked = false
 local Running = false
