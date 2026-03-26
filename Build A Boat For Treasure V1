@@ -4,24 +4,35 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
 
--- =========================
--- KEY SYSTEM
--- =========================
-local CorrectKey = "Thanakrit2010"
-local SavedInput = ""
-local Unlocked = false
+local LocalPlayer = Players.LocalPlayer
+
 local Running = false
 local CurrentTween
 
 -- =========================
--- CREATE WINDOW
+-- RESPAWN SOUND
+-- =========================
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    local fakeSound = Instance.new("Sound")
+    fakeSound.Name = "SystemAudio"
+    fakeSound.Volume = 0
+    fakeSound.Looped = true
+    fakeSound.Parent = newChar
+end)
+
+local CorrectKey = "1669"
+local SavedInput = ""
+local Unlocked = false
+
+-- =========================
+--        CREATE WINDOW
 -- =========================
 local Window = WindUI:CreateWindow({
-    Title = "THANAKRIT HUB 😈",
+    Title = "TK1669 https://discord.gg/tWndbkvXeQ",
     Icon = "key",
     Author = "By เสี๋ยคิวจัดให้ XD",
     Folder = "MyHub",
@@ -30,9 +41,13 @@ local Window = WindUI:CreateWindow({
 })
 
 -- =========================
--- KEY TAB
+--        KEY TAB
 -- =========================
-local KeyTab = Window:Tab({ Title = "Key System", Icon = "key" })
+local KeyTab = Window:Tab({
+    Title = "Key System",
+    Icon = "key"
+})
+
 KeyTab:Section({ Title = "Enter Key" })
 
 KeyTab:Input({
@@ -46,25 +61,60 @@ KeyTab:Input({
 -- =========================
 -- SETTINGS TAB
 -- =========================
-local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
+local SettingsTab = Window:Tab({
+    Title = "Discrod & instagram",
+    Icon = "settings"
+})
 
 SettingsTab:Button({
     Title = "รีเข้าแมพ",
     Callback = function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId)
+        TeleportService:Teleport(game.PlaceId)
     end
 })
 
 SettingsTab:Button({
     Title = "ปิด UI",
     Callback = function()
-        local gui = player.PlayerGui:FindFirstChild("MyHub")
+        local gui = LocalPlayer.PlayerGui:FindFirstChild("MyHub")
         if gui then gui:Destroy() end
     end
 })
 
+SettingsTab:Section({ Title = "Contact" })
+
+SettingsTab:Button({
+    Title = "คัดลอก IG 📸",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://www.instagram.com/ezmxyxii/")
+        end
+
+        WindUI:Notify({
+            Title = "สำเร็จ",
+            Description = "คัดลอก IG แล้ว ✅",
+            Duration = 2
+        })
+    end
+})
+
+SettingsTab:Button({
+    Title = "คัดลอก Discord 💬",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/XKJTssDUSR")
+        end
+
+        WindUI:Notify({
+            Title = "สำเร็จ",
+            Description = "คัดลอก Discord แล้ว ✅",
+            Duration = 2
+        })
+    end
+})
+
 -- =========================
--- LOAD MAIN (AUTO TP ONLY)
+-- LOAD MAIN
 -- =========================
 local function LoadMain()
 
@@ -73,9 +123,6 @@ local function LoadMain()
         Icon = "map-pin"
     })
 
-    -- =========================
-    -- POINTS
-    -- =========================
     local Points = {
         Vector3.new(-60,120,1372),
         Vector3.new(-60,120,2137),
@@ -93,13 +140,13 @@ local function LoadMain()
     local SPEED = 400
     local WAIT_TIME = 16
 
-    -- FLOAT
     local function ApplyFloat(hrp)
         local old = hrp:FindFirstChild("AutoFloat")
         if old then old:Destroy() end
+
         local float = Instance.new("BodyVelocity")
         float.Name = "AutoFloat"
-        float.MaxForce = Vector3.new(0,math.huge,0)
+        float.MaxForce = Vector3.new(0, math.huge, 0)
         float.Parent = hrp
     end
 
@@ -108,19 +155,18 @@ local function LoadMain()
         if old then old:Destroy() end
     end
 
-    -- SMOOTH MOVE
-    local function SmoothMove(hrp,pos)
+    local function SmoothMove(hrp, pos)
         if CurrentTween then
             CurrentTween:Cancel()
         end
 
-        local distance = (hrp.Position-pos).Magnitude
-        local time = distance/SPEED
+        local distance = (hrp.Position - pos).Magnitude
+        local time = distance / SPEED
 
         CurrentTween = TweenService:Create(
             hrp,
-            TweenInfo.new(time,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),
-            {CFrame=CFrame.new(pos)}
+            TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {CFrame = CFrame.new(pos)}
         )
 
         CurrentTween:Play()
@@ -129,33 +175,31 @@ local function LoadMain()
         return Running
     end
 
-    -- COUNTDOWN SOUND
-    local tick = Instance.new("Sound",player.PlayerGui)
+    local tick = Instance.new("Sound", LocalPlayer.PlayerGui)
     tick.SoundId = "rbxassetid://9113420770"
     tick.Volume = 1
 
-    local final = Instance.new("Sound",player.PlayerGui)
+    local final = Instance.new("Sound", LocalPlayer.PlayerGui)
     final.SoundId = "rbxassetid://6026984224"
     final.Volume = 1
 
-    -- LOOP
     local function AutoTeleportLoop()
         while Running do
 
-            local char = player.Character or player.CharacterAdded:Wait()
+            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
             local hrp = char:WaitForChild("HumanoidRootPart")
 
             ApplyFloat(hrp)
 
-            for i,pos in ipairs(Points) do
+            for i, pos in ipairs(Points) do
                 if not Running then return end
-                if not SmoothMove(hrp,pos) then return end
+                if not SmoothMove(hrp, pos) then return end
                 task.wait(0.2)
 
                 if i == #Points then
                     RemoveFloat(hrp)
 
-                    for t = WAIT_TIME,1,-1 do
+                    for t = WAIT_TIME, 1, -1 do
                         if not Running then break end
 
                         if t <= 3 then
@@ -171,7 +215,6 @@ local function LoadMain()
         end
     end
 
-    -- TOGGLE BUTTON
     MainTab:Toggle({
         Title = "เปิด / ปิด Auto Farm",
         Callback = function(state)
@@ -185,6 +228,10 @@ local function LoadMain()
                 })
                 task.spawn(AutoTeleportLoop)
             else
+                if CurrentTween then
+                    CurrentTween:Cancel()
+                end
+
                 WindUI:Notify({
                     Title = "Auto TP",
                     Description = "ระบบหยุดทำงาน",
